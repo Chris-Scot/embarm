@@ -1,0 +1,25 @@
+mountroot()
+{
+   echo "Here we are.  Ready to mountroot."
+   modprobe xfs
+   if [ "$ImageTag" = "" ]; then
+      ImageTag="*"
+   fi
+   mkdir -m0 /mnt
+   for Each in /dev/sd*2; do
+      mount $Each /mnt
+      BootSystem=$(grep -l '^#	CloudDeb second init.$' /mnt/$ImageTag/boot/init | head)
+      BootSystem=${BootSystem%/boot/init}
+      if [ "$BootSystem" != "" ]; then
+         . $BootSystem/boot/init
+         break
+      fi
+      umount /mnt
+   done
+   if grep " $rootmnt " /proc/mounts; then
+      echo "All set to switch root."
+   else
+      echo "ERROR:  $rootmnt not mounted.  Not ready to switch root."
+      sh
+   fi
+}

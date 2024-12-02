@@ -1,0 +1,9 @@
+#!/bin/bash
+export HOME=/root
+export USER=root
+
+date
+ntpdate pool.ntp.org
+crond
+
+StartVNC.sh

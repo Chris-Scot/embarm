@@ -1,0 +1,6 @@
+#!/bin/bash
+FirmBase=$1
+IFS=$'\n'
+for Each in $(find $FirmBase -type f); do
+   diff -bq "${Each#$FirmBase}" "$Each"
+done

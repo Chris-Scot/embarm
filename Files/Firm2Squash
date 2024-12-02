@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+Result=0
+FirmDir="$1"
+ModDir="/modules"
+
+if [ "${FirmDir##*/}" != "$FirmDir" ]; then
+   echo "'$FirmDir' should not contain a path.  It should be in '$ModDir'."
+   Result=1
+fi
+
+if [ ! -d "$ModDir/$FirmDir" ]; then
+   echo "'$ModDir/$FirmDir' does not exist.  This is a fundamental requirement."
+   Result=1
+fi
+
+if [ -f "$ModDir/${FirmDir}.sq" ]; then
+   echo "'$ModDir/${FirmDir}.sq' exists.  Remove this, it can't be updated."
+   Result=1
+fi
+
+if [ $Result -ne 0 ]; then
+   exit $Result
+fi
+
+mksquashfs "$ModDir/$FirmDir" "$ModDir/${FirmDir}.sq" -comp xz -b 1024K -Xbcj x86 -always-use-fragments -noappend

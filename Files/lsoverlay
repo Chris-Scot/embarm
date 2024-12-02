@@ -1,0 +1,26 @@
+#!/bin/bash
+IFS=$'\n'
+for EachMount in $(mount|grep '^overlay '); do
+   MountPoint="${EachMount#* on }"
+   MountPoint="${MountPoint%% type overlay*}"
+   UpperDir="${EachMount#*upperdir=}"
+   UpperDir="${UpperDir%%,*}"
+   WorkDir="${EachMount#*workdir=}"
+   WorkDir="(${WorkDir%%,*})"
+   if DirFrom=$(mount|grep " on ${UpperDir%/UpperDir} "); then
+      WorkDir="$WorkDir$IFS        ${DirFrom%% *}"
+   fi
+   LowerDir="${EachMount#*lowerdir=}"
+   LowerDir="${LowerDir%%,*}"
+   LowerDir="${LowerDir//:/$IFS}"
+   Result=""
+   for Each in $LowerDir; do
+      if DirFrom=$(mount|grep " on ${Each} "); then
+         Result="        ${DirFrom%% *}$IFS$Result"
+      fi
+      Result="      $Each$IFS$Result"
+   done
+   echo "$MountPoint"
+   echo "  RW  $UpperDir $WorkDir"
+   echo "  RO  ${Result:6}"
+done

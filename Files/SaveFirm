@@ -1,0 +1,69 @@
+#!/bin/bash
+
+ModDir="/modules"
+EXCLUDE="^\$|/\$|[.]wh[.][.]wh[.]orph/|^[.]wh[.][.]pwd[.]lock|^[.]wh[.][.]wh[.]plnk/|^[.]wh[.][.]wh[.]aufs|^boot/|^dev/|^etc/[.]pwd[.]lock|^etc/console-setup/cached|^etc/fstab|^etc/mtab|^etc/resolv[.]conf|^etc/X11/xorg[.]conf[.]d|^mnt/|^proc/|^root/[.]cache/|^root/[.]bash_history|^root/[.]fehbg|^root/[.]fluxbox|^root/[.]gtk-bookmarks|^root/[.]Xauthority|^root/[.]xsession-errors|^run/|^sbin/fsck[.]aufs|^sys/|^tmp/|^var/backups/|^var/cache/|^var/lib/apt/|^var/lib/connman/|^var/lib/dhcp/|^var/lib/smartmontools/|^var/lib/systemd/|^var/log/|^var/tmp/"
+Changes=$(mount | grep ' on / .*upperdir=')
+Changes=${Changes#*upperdir=}
+Changes=${Changes%%,*}
+
+if [ "$1" = "" ]; then
+   echo ""
+   echo "saveFirm  - save all changed files in a Firm filesystem directory"
+   echo "            - excluding some predefined files such as /etc/mtab,"
+   echo "              temp & log files, empty directories, apt cache, and such"
+   echo ""
+   echo "Usage:"
+   echo "        $0 target_directory [ changes_directory ]"
+   echo "Eg:"
+   echo "        $0 10-test"
+   echo ""
+   echo "If changes_directory is not specified, $Changes is used."
+   echo ""
+   exit 1
+fi
+
+Result=0
+FirmDir="$1"
+Dest="$ModDir/$FirmDir"
+
+if [ "${FirmDir##*/}" != "$FirmDir" ]; then
+   echo "ERROR:  '$FirmDir' should not contain a path.  It will be placed in '$ModDir'."
+   Result=1
+fi
+
+if [ -d "$Dest" ]; then
+   echo "ERROR:  '$Dest' exists.  Remove this if it is not required."
+   Result=1
+fi
+
+if [ ! "$2" = "" ]; then
+   Changes="$2"
+fi
+
+if [ "${Changes: -9}" != "/UpperDir" ]; then
+   Changes="$Changes/UpperDir"
+fi
+if [ ! -d "$Changes" ]; then
+   echo "ERROR:  '$Changes' does not exist.  Can't find any files to save."
+   Result=1
+fi
+
+if [ $Result -ne 0 ]; then
+   exit $Result
+fi
+
+CWD=$(pwd)
+cd $Changes || exit 1
+
+mkdir -p $Dest
+
+find \( -type d -printf "%p/\n" , -not -type d -print \) \
+  | sed -r "s/^[.]\\///" | egrep -v "$EXCLUDE" \
+  | while read FILE; do
+    cp --parents -afr "$FILE" "$Dest"
+done
+
+find "$Dest" -type d -empty -delete
+echo "${0##*/} completed OK.  $(find "$Dest" | wc -l) objects saved."
+
+cd $CWD

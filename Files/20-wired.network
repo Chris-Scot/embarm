@@ -1,0 +1,8 @@
+[Match]
+Name=ens3
+
+[Link]
+RequiredForOnline=routable
+
+[Network]
+DHCP=yes
