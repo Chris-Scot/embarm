@@ -12,7 +12,6 @@ echo -e "______  $LINENO  ____  Copy repository cache for quicker building.  ___
 
 [ -d $FromBase/Cache.${ProcArch}/apt ] || mkdir -p $FromBase/Cache.${ProcArch}/apt
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > $WorkDir/etc/apt/apt.conf.d/90cache
-#	mkdir -p $WorkDir/var/cache
 echo "Cache $(find $FromBase/Cache.${ProcArch}/apt | wc -l) -> $(find $WorkDir/var/cache/apt | wc -l)"; cp -rn $FromBase/Cache.${ProcArch}/apt $WorkDir/var/cache/
 
 cp /usr/bin/qemu-${ProcArch}-static $WorkDir/
@@ -53,7 +52,6 @@ echo -e "______  $LINENO  ____  Build filesystem for 05-Desktop.  ______________
 cp $FromBase/Files/KyaeolOS.jpg $WorkDir/usr/share/images/fluxbox/KyaeolOS.jpg
 echo "session.screen0.workspaces: 1" >> $WorkDir/etc/X11/fluxbox/init
 echo "session.screen0.toolbar.height: 32" >> $WorkDir/etc/X11/fluxbox/init
-#	echo "session.screen0.rootCommand: fbsetbg -f /usr/share/images/fluxbox/KyaeolOS.jpg" >> $WorkDir/etc/X11/fluxbox/init
 sed -i '/^background.pixmap: /c\background.pixmap:\t/usr/share/images/fluxbox/KyaeolOS.jpg' $WorkDir/usr/share/fluxbox/styles/Squared_for_Debian/theme.cfg
 
 echo -e "______  $LINENO  ____  Build filesystem for 10-NoVNC.  __________________________________________\n"

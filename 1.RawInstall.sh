@@ -93,13 +93,11 @@ EOInstall
 
 echo -e "______  $LINENO  ____  Tamper with the installation to make it work well with Oracle.  __________\n"
 
-if [ "$Testing" = "true" ]; then
-   touch $WorkDir/$ImageTag.id
-fi
 echo "$ImageTag" > $WorkDir/etc/hostname
 cat << EOInstall > $WorkDir/etc/hosts
 127.0.0.1	localhost.localdomain	localhost
 EOInstall
+
 cp $FromBase/Files/adjtime $WorkDir/etc/
 cp $FromBase/Files/rc.local $WorkDir/etc/
 cp $FromBase/Files/keyboard $WorkDir/etc/default/
@@ -112,6 +110,8 @@ cp $FromBase/Files/PathEnv.sh $WorkDir/etc/profile.d/
 rm $WorkDir/etc/resolv.conf
 ln -fs /etc/machine-id $WorkDir/var/lib/dbus/machine-id
 :> $WorkDir/etc/machine-id
+
+echo 'DROPBEAR_EXTRA_ARGS="-ws"' >> $WorkDir/etc/default/dropbear
 
 ln -s systemctl $WorkDir/usr/bin/halt
 ln -s systemctl $WorkDir/usr/bin/poweroff
@@ -147,20 +147,6 @@ EOF
 
 useradd -mUG adm,systemd-journal -s /bin/bash opc -u 1000
 echo "%opc	ALL=(ALL)	NOPASSWD: ALL" > /etc/sudoers
-
-#	This shouldn't work.  It's using an outside variable.
-if [ "$Testing" = "true" ]; then
-   passwd << EOF
-toor
-toor
-EOF
-   passwd opc << EOF
-cpo
-cpo
-EOF
-else
-   echo 'DROPBEAR_EXTRA_ARGS="-ws"' >> /etc/default/dropbear
-fi
 
 EOInstall
 ################################################################################
