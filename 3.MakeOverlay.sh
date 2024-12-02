@@ -97,4 +97,10 @@ cat << EOInstall > /mnt/UpperDir/etc/hosts
 EOInstall
 umount -v /mnt
 
+echo -e "______  $LINENO  ____  Create a tar for easy upload.  ___________________________________________\n"
+
+cd $ToBase
+rm -f ${ImageTag}.tgz
+tar -zcSf ${ImageTag}.tgz $ImageTag
+
 echo "All is said and done.  Thusly, there is nothing more to say or do."

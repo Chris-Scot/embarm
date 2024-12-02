@@ -10,18 +10,17 @@ apt -y install xfsprogs binutils debootstrap qemu-user-static
 
 echo -e "______  $LINENO  ____  Format destination disk / directory.  ____________________________________\n"
 
-if df -hP $ToBase | grep "$ToDev"; then
-   rm -rf $WorkDir
-else
-   mkfs.xfs -L WorkDisk $ToDev
+rm -rf $WorkDir
+mkdir -p $WorkDir
 
-   until df -hP $ToBase | grep "$ToDev"; do
-      echo "Waiting for $ToBase"
-      sleep $((I++))
-   done
-fi
+echo -e "______  $LINENO  ____  Get additional files required for install.  ______________________________\n"
 
-mkdir $WorkDir
+(  [ -d $FromBase/Files ] || mkdir $FromBase/Files
+   cd $FromBase/Files
+   for Each in $(awk '/^cp \$FromBase\/Files\//{print $2}' $FromBase/[0-9].*.sh); do
+      rm -f ${Each##*/}
+      wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/${Each#*/}
+   done )
 
 echo -e "______  $LINENO  ____  Copy repository cache for quicker building.  _____________________________\n"
 
@@ -162,5 +161,11 @@ rm $WorkDir/vmlinuz
 rm $WorkDir/vmlinuz.old
 rm $WorkDir/etc/apt/apt.conf.d/90cache
 rm -rf $WorkDir/var/cache/*
+
+echo -e "______  $LINENO  ____  Create a tar for easy upload.  ___________________________________________\n"
+
+cd $ToBase
+rm -f ${ImageTag}.tgz
+tar -zcSf ${ImageTag}.tgz $ImageTag
 
 echo "All is said and done.  Thusly, there is nothing more to say or do."
