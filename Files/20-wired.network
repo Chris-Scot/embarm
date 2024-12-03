@@ -1,5 +1,5 @@
 [Match]
-Name=ens3
+Name=en*
 
 [Link]
 RequiredForOnline=routable
