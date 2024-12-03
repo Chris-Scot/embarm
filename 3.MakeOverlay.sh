@@ -88,9 +88,8 @@ set timeout=4
 set default=Run
 
 menuentry 'Run' --id 'Run' {
-  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRW=Run boot=mountroot
-  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
-  initrd (\$dev)$ImageTag/boot/initrd (\$dev)$ImageTag/boot/initroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRW=Run boot=mountroot
+  initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
 menuentry 'OracleCloud' --id 'OracleCloud' {

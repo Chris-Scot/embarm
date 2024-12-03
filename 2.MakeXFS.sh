@@ -23,8 +23,8 @@ set timeout=4
 set default=XFS
 
 menuentry 'XFS' --id 'XFS' {
-  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
-  initrd (\$dev)$ImageTag/boot/initrd (\$dev)$ImageTag/boot/initroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
+  initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
 menuentry 'OracleCloud' --id 'OracleCloud' {
