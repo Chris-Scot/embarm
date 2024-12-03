@@ -19,7 +19,7 @@ echo -e "______  $LINENO  ____  Get additional files required for install.  ____
    cd $FromBase/Files
    for Each in $(awk '/^cp \$FromBase\/Files\//{print $2}' $FromBase/[0-9].*.sh); do
       rm -f ${Each##*/}
-      wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/${Each#*/}
+      wget -nv https://github.com/Chris-Scot/embarm/raw/refs/heads/main/${Each#*/}
    done )
 
 echo -e "______  $LINENO  ____  Copy repository cache for quicker building.  _____________________________\n"
