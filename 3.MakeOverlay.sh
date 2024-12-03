@@ -100,14 +100,17 @@ menuentry 'OracleCloud' --id 'OracleCloud' {
 EOInstall
 
 
-echo -e "______  $LINENO  ____  Copy filesystem for 50-HostFirm.  ________________________________________\n"
+echo -e "______  $LINENO  ____  Copy filesystem for HostFirm.  ___________________________________________\n"
 
 truncate $WorkDir/Run.xfs -s 10G
 mkfs.xfs -L Run $WorkDir/Run.xfs
 sync
 mount -v $WorkDir/Run.xfs /mnt
-cp -r $FromBase/Files/50-HostFirm/* /mnt/
+mkdir -p /mnt/WorkDir /mnt/UpperDir/root/.vnc /mnt/UpperDir/etc/default
 echo "$ImageTag" > /mnt/UpperDir/etc/hostname
+
+cp $FromBase/Files/keyboard /mnt/UpperDir/etc/default/
+
 cat << EOInstall > /mnt/UpperDir/etc/hosts
 127.0.0.1	localhost.localdomain	localhost
 127.0.0.1	$ImageTag.localdomain	$ImageTag
