@@ -88,11 +88,16 @@ set timeout=4
 set default=Run
 
 menuentry 'Run' --id 'Run' {
-  linux (hd0,2)$ImageTag/boot/vmlinuz
-  initrd (hd0,2)$ImageTag/boot/initrd (hd0,2)$ImageTag/boot/initroot
-  options ImageTag=$ImageTag RootRW=Run boot=mountroot
+  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRW=Run boot=mountroot
+  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
+  initrd (\$dev)$ImageTag/boot/initrd (\$dev)$ImageTag/boot/initroot
+}
+
+menuentry 'OracleCloud' --id 'OracleCloud' {
+  configfile \$prefix/grub.cfg.std
 }
 EOInstall
+
 
 echo -e "______  $LINENO  ____  Copy filesystem for 50-HostFirm.  ________________________________________\n"
 

@@ -23,9 +23,12 @@ set timeout=4
 set default=XFS
 
 menuentry 'XFS' --id 'XFS' {
-  linux (hd0,2)$ImageTag/boot/vmlinuz
-  initrd (hd0,2)$ImageTag/boot/initrd (hd0,2)$ImageTag/boot/initroot
-  options ImageTag=$ImageTag boot=mountroot
+  linux (\$dev)$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
+  initrd (\$dev)$ImageTag/boot/initrd (\$dev)$ImageTag/boot/initroot
+}
+
+menuentry 'OracleCloud' --id 'OracleCloud' {
+  configfile \$prefix/grub.cfg.std
 }
 EOInstall
 
