@@ -16,7 +16,7 @@ echo "Cache $(find $FromBase/Cache.${ProcArch}/apt | wc -l) -> $(find $WorkDir/v
 
 cp /usr/bin/qemu-${ProcArch}-static $WorkDir/
 
-echo -e "______  $LINENO  ____  Reconfigure as a squashfs system.  _______________________________________\n"
+echo -e "______  $LINENO  ____  Reconfigure as an overlay /  squashfs system.  ___________________________\n"
 
 ################################################################################
 LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
@@ -82,6 +82,17 @@ umount -v /mnt
 umount -v $WorkDir
 mv $WorkDir.Core.xfs $WorkDir/Core.xfs
 rm $WorkDir/Run.xfs
+
+cat << EOInstall > $Workdir/boot/grub.cfg
+set timeout=4
+set default=Run
+
+menuentry 'Run' --id 'Run' {
+  linux (hd0,2)$ImageTag/boot/vmlinuz
+  initrd (hd0,2)$ImageTag/boot/initrd (hd0,2)$ImageTag/boot/initroot
+  options ImageTag=$ImageTag RootRW=Run boot=mountroot
+}
+EOInstall
 
 echo -e "______  $LINENO  ____  Copy filesystem for 50-HostFirm.  ________________________________________\n"
 

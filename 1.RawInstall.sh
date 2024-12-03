@@ -63,7 +63,16 @@ ln -s /lib/systemd/systemd $WorkDir/sbin/init
    ln -s $(ls -1 vmlinuz-*) vmlinuz
    ln -s $(ls -1 initrd.*) initrd  )
 
-cp $FromBase/Files/grub.cfg $WorkDir/boot/
+cat << EOInstall > $Workdir/boot/grub.cfg
+set timeout=4
+set default=Raw
+
+menuentry 'Raw' --id 'Raw' {
+  linux (hd0,2)$ImageTag/boot/vmlinuz
+  initrd (hd0,2)$ImageTag/boot/initrd (hd0,2)$ImageTag/boot/initroot
+  options boot=mountroot
+}
+EOInstall
 
 [ -d $WorkDir/boot/scripts ] || mkdir $WorkDir/boot/scripts
 cp $FromBase/Files/mountroot $WorkDir/boot/scripts/

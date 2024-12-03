@@ -18,6 +18,17 @@ mv $WorkDir.tmp/* /mnt/
 rmdir $WorkDir.tmp
 umount -v /mnt
 
+cat << EOInstall > $Workdir/boot/grub.cfg
+set timeout=4
+set default=XFS
+
+menuentry 'XFS' --id 'XFS' {
+  linux (hd0,2)$ImageTag/boot/vmlinuz
+  initrd (hd0,2)$ImageTag/boot/initrd (hd0,2)$ImageTag/boot/initroot
+  options ImageTag=$ImageTag boot=mountroot
+}
+EOInstall
+
 echo -e "______  $LINENO  ____  Create a tar for easy upload.  ___________________________________________\n"
 
 cd $ToBase
