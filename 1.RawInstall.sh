@@ -63,7 +63,7 @@ ln -s /lib/systemd/systemd $WorkDir/sbin/init
    ln -s $(ls -1 vmlinuz-*) vmlinuz
    ln -s $(ls -1 initrd.*) initrd  )
 
-cat << EOInstall > $Workdir/boot/grub.cfg
+cat << EOInstall > $WorkDir/boot/grub.cfg
 set timeout=4
 set default=Raw
 
