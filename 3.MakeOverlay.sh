@@ -15,6 +15,7 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > $WorkDir/etc/apt/apt
 echo "Cache $(find $FromBase/Cache.${ProcArch}/apt | wc -l) -> $(find $WorkDir/var/cache/apt | wc -l)"; cp -rn $FromBase/Cache.${ProcArch}/apt $WorkDir/var/cache/
 
 cp /usr/bin/qemu-${ProcArch}-static $WorkDir/
+cp /etc/resolv.conf $WorkDir/etc/
 
 echo -e "______  $LINENO  ____  Reconfigure as an overlay /  squashfs system.  ___________________________\n"
 
@@ -70,6 +71,7 @@ echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag
 rm $WorkDir/qemu-${ProcArch}-static
 rm $WorkDir/etc/apt/apt.conf.d/90cache
 rm -rf $WorkDir/var/cache/apt
+rm $WorkDir/etc/resolv.conf
 
 echo -e "______  $LINENO  ____  Create Core xfs filesystem for $ImageTag.  _______________________________\n"
 
