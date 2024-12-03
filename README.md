@@ -1,6 +1,8 @@
 # embarm
 Small debian install for oracle cloud built using qemu.
 
+Not working yet.  Give me a week.
+
 Embarm.  Emulated Machine Build for ARM processors.  I suppose I should have rummaged harder to see if there were any cloud offerings that had access to the Debian repositories.
 I was lazy and I used what I had to hand which was a server running slax in qemu on x86_64.
 You can start this build using any Debian based system on any architecture.
