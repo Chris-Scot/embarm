@@ -65,6 +65,7 @@ chmod 755 $WorkDir/root/.vnc/xstartup
 
 cp $FromBase/Files/novnc_authenticator $WorkDir/usr/local/sbin/
 cp $FromBase/Files/ConnectVNC.sh $WorkDir/usr/local/sbin/
+chmod 755 $WorkDir/usr/local/sbin/*
 
 echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag.  _______________________\n"
 
@@ -116,9 +117,9 @@ echo "$ImageTag" > /mnt/etc/hostname
 
 cp $FromBase/Files/keyboard /mnt/etc/default/
 
-cat << EOInstall > /mnt/etc/hosts
-127.0.0.1       localhost.localdomain   localhost
-127.0.0.1       $ImageTag.localdomain   $ImageTag
+cat << EOInstall > /mnt/UpperDir/etc/hosts
+127.0.0.1${Tab}localhost.localdomain${Tab}localhost
+127.0.0.1${Tab}$ImageTag.localdomain${Tab}$ImageTag
 EOInstall
 umount -v /mnt
 
@@ -126,15 +127,7 @@ truncate $WorkDir/Resume.xfs -s 10G
 mkfs.xfs -L Resume $WorkDir/Resume.xfs
 sync
 mount -v $WorkDir/Resume.xfs /mnt
-mkdir -p /mnt/WorkDir /mnt/UpperDir/root/.vnc /mnt/UpperDir/etc/default
-echo "$ImageTag" > /mnt/UpperDir/etc/hostname
-
-cp $FromBase/Files/keyboard /mnt/UpperDir/etc/default/
-
-cat << EOInstall > /mnt/UpperDir/etc/hosts
-127.0.0.1	localhost.localdomain	localhost
-127.0.0.1	$ImageTag.localdomain	$ImageTag
-EOInstall
+mkdir /mnt/WorkDir /mnt/UpperDir
 umount -v /mnt
 
 echo -e "______  $LINENO  ____  Create a tar for easy upload.  ___________________________________________\n"

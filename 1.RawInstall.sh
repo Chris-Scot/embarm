@@ -106,7 +106,7 @@ echo -e "______  $LINENO  ____  Tamper with the installation to make it work wel
 
 echo "$ImageTag" > $WorkDir/etc/hostname
 cat << EOInstall > $WorkDir/etc/hosts
-127.0.0.1	localhost.localdomain	localhost
+127.0.0.1${Tab}localhost.localdomain${Tab}localhost
 EOInstall
 
 cp $FromBase/Files/adjtime $WorkDir/etc/
@@ -117,6 +117,7 @@ cp $FromBase/Files/SnapAll.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/SnapExpire.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/lsoverlay $WorkDir/usr/local/sbin/
 cp $FromBase/Files/PathEnv.sh $WorkDir/etc/profile.d/
+chmod 755 $WorkDir/usr/local/sbin/*
 
 rm $WorkDir/etc/resolv.conf
 ln -fs /etc/machine-id $WorkDir/var/lib/dbus/machine-id
