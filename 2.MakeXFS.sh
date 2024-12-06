@@ -23,7 +23,12 @@ set timeout=4
 set default=XFS
 
 menuentry 'XFS' --id 'XFS' {
-  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRW=Run boot=mountroot
+  initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
+}
+
+menuentry 'RAM FS' --id 'RAMFS' {
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Run boot=mountroot
   initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
