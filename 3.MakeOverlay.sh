@@ -94,6 +94,11 @@ menuentry 'Run' --id 'Run' {
   initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
+menuentry 'Resume' --id 'Resume' {
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Run RootRW=Resume boot=mountroot
+  initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
+}
+
 menuentry 'OracleCloud' --id 'OracleCloud' {
   configfile \$prefix/grub.cfg.std
 }
@@ -106,6 +111,21 @@ truncate $WorkDir/Run.xfs -s 10G
 mkfs.xfs -L Run $WorkDir/Run.xfs
 sync
 mount -v $WorkDir/Run.xfs /mnt
+mkdir -p /mnt/root/.vnc /mnt/etc/default
+echo "$ImageTag" > /mnt/etc/hostname
+
+cp $FromBase/Files/keyboard /mnt/etc/default/
+
+cat << EOInstall > /mnt/etc/hosts
+127.0.0.1       localhost.localdomain   localhost
+127.0.0.1       $ImageTag.localdomain   $ImageTag
+EOInstall
+umount -v /mnt
+
+truncate $WorkDir/Resume.xfs -s 10G
+mkfs.xfs -L Resume $WorkDir/Resume.xfs
+sync
+mount -v $WorkDir/Resume.xfs /mnt
 mkdir -p /mnt/WorkDir /mnt/UpperDir/root/.vnc /mnt/UpperDir/etc/default
 echo "$ImageTag" > /mnt/UpperDir/etc/hostname
 
