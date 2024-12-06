@@ -117,7 +117,7 @@ echo "$ImageTag" > /mnt/etc/hostname
 
 cp $FromBase/Files/keyboard /mnt/etc/default/
 
-cat << EOInstall > /mnt/UpperDir/etc/hosts
+cat << EOInstall > /mnt/etc/hosts
 127.0.0.1${Tab}localhost.localdomain${Tab}localhost
 127.0.0.1${Tab}$ImageTag.localdomain${Tab}$ImageTag
 EOInstall
