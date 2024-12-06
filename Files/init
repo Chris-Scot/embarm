@@ -1,5 +1,6 @@
 #	CloudDeb second init.
 chmod 0 $rootmnt
+set -x
 
 if [ "$RootRW" != "${RootRW/\/}" ]; then
    echo "ERROR:  Root filesystem '$RootRW' should not contain a path."
@@ -7,73 +8,115 @@ if [ "$RootRW" != "${RootRW/\/}" ]; then
    exit 1
 fi
 
-if ! grep '^squashfs ' /proc/modules; then
-   insmod $(ls -1 $BootSystem/boot/lib/squashfs.ko | tail)
+#	Check for simple installation within a directory.
+if [ "$RootRO" = "" -a "$RootRW" = "" ]; then
+   if [ -d $BootSystem/etc -a -d $BootSystem/media -a -d $BootSystem/usr ]; then
+      mount -v $BootSystem $rootmnt
+      rmdir $rootmnt/media/*
+      Result=$(awk '/ \/mnt xfs /{print $1}' /proc/mounts)
+      mkdir -m0 $rootmnt/media/${Result##*/}
+      mount -v --move /mnt $rootmnt/media/${Result##*/}
+      echo "Host filesystem ($BootSystem) mounted OK."
+      return
+   elif [ ! -f $BootSystem/Core.sq ]; then
+      echo "ERROR:  Can't find Core filesystem to back overlay."
+/bin/sh
+      exit 1
+   fi
 fi
+
+if [ "$RootRO" = "$RootRW" ]; then
+   echo "ERROR:  Read-only and read-write filesystems can not be the same."
+/bin/sh
+   exit 1
+fi
+
+#	One of three options.
+#	1.  Use a ramfs filesystem for RW.
+#	2.  RootRW contains the full OS.
+#	3.  RootRW contains the top level overlay.
+if [ "$RootRW" = "" ]; then
+   RootRW=RamFS
+   mkdir -m0 /$RootRW.tmp
+   mount -vt tmpfs -o "nodev,noexec,nosuid,mode=0755" tmpfs /$RootRW.tmp
+   mkdir /$RootRW.tmp/UpperDir
+   mkdir /$RootRW.tmp/WorkDir
+   UpperDir=/$RootRW.tmp/UpperDir
+   WorkDir=/$RootRW.tmp/WorkDir
+else
+   if [ -f "$BootSystem/$RootRW.xfs" ]; then
+      mkdir -m0 /$RootRW.xfs
+      mount -v $BootSystem/$RootRW.xfs /$RootRW.xfs
+      if [ -d /$RootRW.xfs/etc -a -d /$RootRW.xfs/media -a -d /$RootRW.xfs/usr ]; then
+         mount -v --move /$RootRW.xfs $rootmnt
+         mount -v $BootSystem/boot $rootmnt/boot
+         rmdir $rootmnt/media/*
+         Result=$(awk '/ \/mnt xfs /{print $1}' /proc/mounts)
+         mkdir -m0 $rootmnt/media/${Result##*/}
+         mount -v --move /mnt $rootmnt/media/${Result##*/}
+         echo "Host filesystem ($BootSystem/$RootRW.xfs) mounted OK."
+         return
+      elif [ -d /$RootRW.xfs/UpperDir -a -d /$RootRW.xfs/WorkDir ]; then
+         UpperDir=/$RootRW.xfs/UpperDir
+         WorkDir=/$RootRW.xfs/WorkDir
+      else
+         echo "ERROR:  RootRW filesystem ($RootRW) is not in the correct format."
+/bin/sh
+         exit 1
+      fi
+   else
+      echo "ERROR:  Can't find RootRW filesystem ($RootRW)."
+/bin/sh
+      exit 1
+   fi
+fi
+
 if ! grep '^overlay ' /proc/modules; then
    insmod $(ls -1 $BootSystem/boot/lib/overlay.ko | tail)
 fi
 
-if [ -f "$BootSystem/$RootRW.xfs" ]; then
-   mount -v $BootSystem/$RootRW.xfs $rootmnt
-   if [ -d $rootmnt/UpperDir -a -d $rootmnt/WorkDir ]; then
-      umount -v $rootmnt
-   else
-      mount -v $BootSystem/boot $rootmnt/boot
-      rmdir $rootmnt/media/*
-      Result=$(awk '/ \/mnt xfs /{print $1}' /proc/mounts)
-      mkdir -m0 $rootmnt/media/${Result##*/}
-      mount -v --move /mnt $rootmnt/media/${Result##*/}
-      echo "Host filesystem built OK."
-   fi
-else
-   if [ -d $BootSystem/$RootRW/etc -a -d $BootSystem/$RootRW/usr ]; then
-      mount -v $BootSystem/$RootRW $rootmnt
-      rmdir $rootmnt/media/*
-      Result=$(awk '/ \/mnt xfs /{print $1}' /proc/mounts)
-      mkdir -m0 $rootmnt/media/${Result##*/}
-      mount -v --move /mnt $rootmnt/media/${Result##*/}
-      echo "Host filesystem built OK."
-   else
-      umount -v $rootmnt
-   fi
+if ! grep '^squashfs ' /proc/modules; then
+   insmod $(ls -1 $BootSystem/boot/lib/squashfs.ko | tail)
 fi
 
-
 if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
-   if [ -f "$BootSystem/$RootRW.xfs" ]; then
-      mkdir -m0 /$RootRW.xfs
-      mount -v $BootSystem/$RootRW.xfs /$RootRW.xfs
-      UpperDir=/$RootRW.xfs/UpperDir
-      WorkDir=/$RootRW.xfs/WorkDir
-   else
-      mkdir -m0 /$RootRW.tmp
-      mount -vt tmpfs -o "nodev,noexec,nosuid,mode=0755" tmpfs /$RootRW.tmp
-      mkdir /$RootRW.tmp/UpperDir
-      mkdir /$RootRW.tmp/WorkDir
-      UpperDir=/$RootRW.tmp/UpperDir
-      WorkDir=/$RootRW.tmp/WorkDir
+#	Check for mid level 'firm' filesystem.
+   if [ "$RootRO" != "" ]; then
+      if [ -f "$BootSystem/$RootRO.xfs" -o -f "$BootSystem/$RootRO.sq" ]; then
+         if [ -f "$BootSystem/$RootRO.xfs" ]; then
+            mkdir -m0 /$RootRO.xfs
+            mount -v $BootSystem/$RootRO.xfs /$RootRO.xfs
+            if [ -d /$RootRO.xfs/UpperDir ]; then
+               MidDir="/$RootRO.xfs/UpperDir:"
+            else
+               MidDir="/$RootRO.xfs:"
+            fi
+         fi
+      else
+         echo "ERROR:  Can't find RootRO filesystem ($RootRO) to include in overlay."
+/bin/sh
+         exit 1
+      fi
    fi
 
-   if [ -f "$BootSystem/$RootRW.sq" ]; then
-      mkdir -m0 /$RootRW.sq
-      mount -v $BootSystem/$RootRW.sq /$RootRW.sq
-      LowerDir=/$RootRW.sq
+   if [ -f "$BootSystem/$RootRO.sq" ]; then
+      mkdir -m0 /$RootRO.sq
+      mount -v $BootSystem/$RootRO.sq /$RootRO.sq
+      LowerDir="/$RootRO.sq"
    elif [ -f $BootSystem/Core.sq ]; then
       mkdir -m0 /Core.sq
       mount -v $BootSystem/Core.sq /Core.sq
       LowerDir="/Core.sq"
-   elif [ -f $BootSystem/Core.xfs ]; then
-      mkdir -m0 /Core.xfs
-      mount -v $BootSystem/Core.xfs /Core.xfs
-      LowerDir=/Core.xfs
+   elif [ -f "$BootSystem/$RootRO.xfs" ]; then
+      LowerDir="/$RootRO.xfs"
+      MidDir=""
    else
       echo "ERROR:  Can't find Core filesystem to back overlay."
 /bin/sh
       exit 1
    fi
 
-   mount -vt overlay overlay -o xino=on,metacopy=on,lowerdir=$LowerDir,upperdir=$UpperDir,workdir=$WorkDir $rootmnt
+   mount -vt overlay overlay -o xino=on,metacopy=on,lowerdir=$MidDir$LowerDir,upperdir=$UpperDir,workdir=$WorkDir $rootmnt
 
    mount -v $BootSystem/boot $rootmnt/boot
    rmdir $rootmnt/media/*
@@ -84,5 +127,7 @@ if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
    mount -v $rootmnt/media/${Result##*/}/$ImageTag $rootmnt/Inception
    [ -d $rootmnt/var/lib/machines/.${LowerDir:1} ] || mkdir -m0 $rootmnt/var/lib/machines/.${LowerDir:1}
    mount -v --move $LowerDir $rootmnt/var/lib/machines/.${LowerDir:1}
-   echo "Host filesystem built OK."
+   echo "Host filesystem ($LowerDir $RootRO $UpperDir) built OK."
+else
+   echo "ERROR:  There should have been a filesystem here."
 fi
