@@ -1,6 +1,5 @@
 #	CloudDeb second init.
 chmod 0 $rootmnt
-set -x
 
 if [ "$RootRW" != "${RootRW/\/}" ]; then
    echo "ERROR:  Root filesystem '$RootRW' should not contain a path."
