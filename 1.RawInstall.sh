@@ -131,11 +131,11 @@ ln -s systemctl $WorkDir/usr/bin/reboot
 ln -s systemctl $WorkDir/usr/bin/shutdown
 
 ################################################################################
-LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
+LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << EOInstall
 
 cd /usr/local/bin
-for Each in $(busybox --list | grep -v busybox); do
-   which $Each || ln -fs /usr/bin/busybox $Each
+for Each in \$(busybox --list | grep -v busybox); do
+   which \$Each || ln -fs /usr/bin/busybox \$Each
 done
 
 rm -rf /dev/*
@@ -159,6 +159,11 @@ EOF
 
 useradd -mUG adm,systemd-journal -s /bin/bash opc -u 1000
 echo "%opc	ALL=(ALL)	NOPASSWD: ALL" > /etc/sudoers
+
+passwd << EOF
+$ImageTag
+$ImageTag
+EOF
 
 EOInstall
 ################################################################################

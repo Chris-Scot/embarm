@@ -18,9 +18,11 @@ if [ -f $HOME/.vnc/passwd ]; then
             echo "Can't determine a display number for VNC."
          else
             if vncserver $Display -geometry 1600x900 -dpi 150 -desktop $HOSTNAME -interface $LoopIP -nolisten tcp; then
+               Display=${Display:1}
                if [ ! -e $HOME/.vnc/self.pem ]; then
                   openssl req -new -x509 -nodes -sha256 -days 3560 -subj "/CN=$HOSTNAME" -keyout $HOME/.vnc/self.pem -out $HOME/.vnc/self.pem
                fi
+               echo "Starting NoVNC on $LoopIP:$((6080 + $Display)) connecting to VNC on $LoopIP:$((5900 + $Display))"
                /usr/share/novnc/utils/novnc_proxy --ssl-only --cert $HOME/.vnc/self.pem --listen $LoopIP:$((6080 + $Display)) --vnc $LoopIP:$((5900 + $Display)) &
                if [ "$PublicIP" = "" ]; then
                   echo "Can't determine network address for this host."

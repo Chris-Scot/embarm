@@ -65,6 +65,7 @@ chmod 755 $WorkDir/root/.vnc/xstartup
 
 cp $FromBase/Files/novnc_authenticator $WorkDir/usr/local/sbin/
 cp $FromBase/Files/ConnectVNC.sh $WorkDir/usr/local/sbin/
+cp $FromBase/Files/StartVNC.sh $WorkDir/usr/local/sbin/
 chmod 755 $WorkDir/usr/local/sbin/*
 
 echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag.  _______________________\n"
@@ -72,7 +73,31 @@ echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag
 rm $WorkDir/qemu-${ProcArch}-static
 rm $WorkDir/etc/apt/apt.conf.d/90cache
 rm -rf $WorkDir/var/cache/apt
-rm $WorkDir/etc/resolv.conf
+
+echo -e "______  $LINENO  ____  Create filesystem for HostFirm.  _________________________________________\n"
+
+truncate $WorkDir/Run.xfs -s 10G
+mkfs.xfs -L Run $WorkDir/Run.xfs
+sync
+mount -v $WorkDir/Run.xfs /mnt
+mkdir -p /mnt/root/.vnc /mnt/etc/default /mnt/usr/local/sbin
+echo "$ImageTag" > /mnt/etc/hostname
+mv $WorkDir/etc/resolv.conf /mnt/etc/
+mv $WorkDir/usr/local/sbin /mnt/usr/local/sbin/
+mv $WorkDir/etc/default/keyboard /mnt/etc/default/
+
+cat << EOInstall > /mnt/etc/hosts
+127.0.0.1${Tab}localhost.localdomain${Tab}localhost
+127.0.0.1${Tab}$ImageTag.localdomain${Tab}$ImageTag
+EOInstall
+umount -v /mnt
+
+truncate $WorkDir/Resume.xfs -s 10G
+mkfs.xfs -L Resume $WorkDir/Resume.xfs
+sync
+mount -v $WorkDir/Resume.xfs /mnt
+mkdir /mnt/WorkDir /mnt/UpperDir
+umount -v /mnt
 
 echo -e "______  $LINENO  ____  Create Core xfs filesystem for $ImageTag.  _______________________________\n"
 
@@ -104,31 +129,6 @@ menuentry 'OracleCloud' --id 'OracleCloud' {
   configfile \$prefix/grub.cfg.std
 }
 EOInstall
-
-
-echo -e "______  $LINENO  ____  Copy filesystem for HostFirm.  ___________________________________________\n"
-
-truncate $WorkDir/Run.xfs -s 10G
-mkfs.xfs -L Run $WorkDir/Run.xfs
-sync
-mount -v $WorkDir/Run.xfs /mnt
-mkdir -p /mnt/root/.vnc /mnt/etc/default
-echo "$ImageTag" > /mnt/etc/hostname
-
-cp $FromBase/Files/keyboard /mnt/etc/default/
-
-cat << EOInstall > /mnt/etc/hosts
-127.0.0.1${Tab}localhost.localdomain${Tab}localhost
-127.0.0.1${Tab}$ImageTag.localdomain${Tab}$ImageTag
-EOInstall
-umount -v /mnt
-
-truncate $WorkDir/Resume.xfs -s 10G
-mkfs.xfs -L Resume $WorkDir/Resume.xfs
-sync
-mount -v $WorkDir/Resume.xfs /mnt
-mkdir /mnt/WorkDir /mnt/UpperDir
-umount -v /mnt
 
 echo -e "______  $LINENO  ____  Create a tar for easy upload.  ___________________________________________\n"
 
