@@ -111,7 +111,7 @@ umount -v $WorkDir
 mv $WorkDir.Core.xfs $WorkDir/Core.xfs
 rm $WorkDir/Run.xfs
 
-cat << EOInstall > $Workdir/boot/grub.cfg
+cat << EOInstall > $WorkDir/boot/grub.cfg
 set timeout=4
 set default=Run
 
