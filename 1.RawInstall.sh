@@ -31,7 +31,7 @@ echo -e "______  $LINENO  ____  Download and prepare debian install.  __________
 mkdir -p $WorkDir/var/cache
 echo "Cache $(find $FromBase/Cache.${ProcArch}/apt | wc -l) -> $(find $WorkDir/var/cache/apt | wc -l)"; cp -rn $FromBase/Cache.${ProcArch}/apt $WorkDir/var/cache/
 #	The --excluded stuff is included in busybox.
-debootstrap --foreign --arch $RepoArch --variant=minbase --include=busybox-static,dbus,dropbear,ntpdate,openssh-client,openssh-sftp-server,sudo,systemd,rsync,xfsprogs --exclude=cpio,fdisk,gzip,hostname,ifupdown,iputils-ping,less,libfdisk1,procps,vim-common,vim-tiny,whiptail,zlib1g bookworm $WorkDir http://ftp.uk.debian.org/debian
+debootstrap --foreign --arch $RepoArch --variant=minbase --include=busybox-static,dbus,dropbear,ntpdate,openssh-client,openssh-sftp-server,sudo,systemd,rsync,tmux,xfsprogs --exclude=cpio,fdisk,gzip,hostname,ifupdown,iputils-ping,less,libfdisk1,procps,vim-common,vim-tiny,whiptail,zlib1g bookworm $WorkDir http://ftp.uk.debian.org/debian
 
 cp /usr/bin/qemu-${ProcArch}-static $WorkDir/
 mkdir -p $WorkDir/etc/apt/apt.conf.d/
