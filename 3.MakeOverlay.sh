@@ -76,11 +76,13 @@ rm -rf $WorkDir/var/cache/apt
 
 echo -e "______  $LINENO  ____  Create filesystem for HostFirm.  _________________________________________\n"
 
-truncate $WorkDir/Run.xfs -s 10G
-mkfs.xfs -L Run $WorkDir/Run.xfs
+truncate $WorkDir.Run.xfs -s 10G
+mkfs.xfs -L Run $WorkDir.Run.xfs
 sync
-mount -v $WorkDir/Run.xfs /mnt
-mkdir -p /mnt/root/.vnc /mnt/etc/default /mnt/usr/local/sbin
+mount -v $WorkDir.Run.xfs /mnt
+mkdir -p /mnt/root/.vnc /mnt/home/opc /mnt/etc/default /mnt/usr/local
+chmod 700 /mnt/root /mnt/home/opc
+chown 1000:1000 /mnt/home/opc
 echo "$ImageTag" > /mnt/etc/hostname
 mv $WorkDir/etc/resolv.conf /mnt/etc/
 mv $WorkDir/usr/local/sbin /mnt/usr/local/sbin/
@@ -90,13 +92,6 @@ cat << EOInstall > /mnt/etc/hosts
 127.0.0.1${Tab}localhost.localdomain${Tab}localhost
 127.0.0.1${Tab}$ImageTag.localdomain${Tab}$ImageTag
 EOInstall
-umount -v /mnt
-
-truncate $WorkDir/Resume.xfs -s 10G
-mkfs.xfs -L Resume $WorkDir/Resume.xfs
-sync
-mount -v $WorkDir/Resume.xfs /mnt
-mkdir /mnt/WorkDir /mnt/UpperDir
 umount -v /mnt
 
 echo -e "______  $LINENO  ____  Create Core xfs filesystem for $ImageTag.  _______________________________\n"
@@ -109,7 +104,14 @@ mv $WorkDir/* /mnt/
 umount -v /mnt
 umount -v $WorkDir
 mv $WorkDir.Core.xfs $WorkDir/Core.xfs
-rm $WorkDir/Run.xfs
+mv $WorkDir.Run.xfs $WorkDir/Run.xfs
+
+truncate $WorkDir/Resume.xfs -s 10G
+mkfs.xfs -L Resume $WorkDir/Resume.xfs
+sync
+mount -v $WorkDir/Resume.xfs /mnt
+mkdir /mnt/WorkDir /mnt/UpperDir
+umount -v /mnt
 
 cat << EOInstall > $WorkDir/boot/grub.cfg
 set timeout=4

@@ -18,7 +18,7 @@ mv $WorkDir.tmp/* /mnt/
 rmdir $WorkDir.tmp
 umount -v /mnt
 
-cat << EOInstall > $Workdir/boot/grub.cfg
+cat << EOInstall > $WorkDir/boot/grub.cfg
 set timeout=4
 set default=XFS
 
