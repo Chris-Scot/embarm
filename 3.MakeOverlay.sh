@@ -24,6 +24,14 @@ LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
 
 apt -y install squashfs-tools cloud-init systemd-container bindfs xorg fluxbox novnc tightvncserver xfonts-base oathtool qrencode
 
+PATH=/usr/local/sbin:/usr/sbin:/usr/bin
+cd /usr/local/bin
+for Each in $(ls -1); do
+   if which $Each; then
+      rm $Each
+   fi
+done
+
 EOInstall
 ################################################################################
 
@@ -97,7 +105,7 @@ umount -v /mnt
 echo -e "______  $LINENO  ____  Create Core xfs filesystem for $ImageTag.  _______________________________\n"
 
 truncate $WorkDir.Core.xfs -s 10G
-mkfs.xfs -L $ImageTag $WorkDir.Core.xfs
+mkfs.xfs -L ${ImageTag%%.*} $WorkDir.Core.xfs
 sync
 mount -v $WorkDir.Core.xfs /mnt
 mv $WorkDir/* /mnt/

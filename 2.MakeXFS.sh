@@ -11,7 +11,7 @@ mkdir $WorkDir
 mv $WorkDir.tmp/boot $WorkDir/
 mkdir -m0 $WorkDir.tmp/boot
 truncate $WorkDir/Run.xfs -s 10G
-mkfs.xfs -L $ImageTag $WorkDir/Run.xfs
+mkfs.xfs -L ${ImageTag%%.*} $WorkDir/Run.xfs
 sync
 mount -v $WorkDir/Run.xfs /mnt
 mv $WorkDir.tmp/* /mnt/

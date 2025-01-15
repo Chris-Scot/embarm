@@ -9,7 +9,7 @@ echo -e "______  $LINENO  ____  Convert filesystems to SquashFS for installation
 apt -y install squashfs-tools
 
 mount -v $WorkDir/Core.xfs /mnt
-mksquashfs /mnt "$WorkDir/Core.sq" -comp xz -b 1024K -Xbcj x86 -always-use-fragments -noappend
+mksquashfs /mnt "$WorkDir/Core.sq" -comp xz -b 1M -always-use-fragments -noappend
 umount -v /mnt
 rm $WorkDir/Core.xfs
 

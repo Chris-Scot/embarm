@@ -124,7 +124,7 @@ if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
    mount -v --move /mnt $rootmnt/media/${Result##*/}
    [ -d $rootmnt/Inception ] || mkdir -m0 $rootmnt/Inception
    mount -v $rootmnt/media/${Result##*/}/$ImageTag $rootmnt/Inception
-   [ -d $rootmnt/var/lib/machines/.${LowerDir:1} ] || mkdir -m0 $rootmnt/var/lib/machines/.${LowerDir:1}
+   [ -d $rootmnt/var/lib/machines/.${LowerDir:1} ] || mkdir -pm0 $rootmnt/var/lib/machines/.${LowerDir:1}
    mount -v --move $LowerDir $rootmnt/var/lib/machines/.${LowerDir:1}
    echo "Host filesystem ($LowerDir $RootRO $UpperDir) built OK."
 else
