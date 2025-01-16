@@ -22,7 +22,7 @@ echo -e "______  $LINENO  ____  Reconfigure as an overlay /  squashfs system.  _
 ################################################################################
 LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
 
-apt -y install squashfs-tools cloud-init systemd-container bindfs xorg fluxbox novnc tightvncserver xfonts-base oathtool qrencode
+apt -y install bindfs cloud-init firewalld fluxbox novnc oathtool qrencode squashfs-tools systemd-container tightvncserver xfonts-base xorg
 
 PATH=/usr/local/sbin:/usr/sbin:/usr/bin
 cd /usr/local/bin
