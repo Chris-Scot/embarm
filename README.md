@@ -29,83 +29,117 @@ ________________________________________________________________________________
 
 Build Process.  Raw install.
 Choose a suitable place for the build scripts.
+...
 mkdir EInstall
 cd EInstall
+...
 
 Get the environment file and initial build file.  You can, of course, use git to acquire all the files.
+...
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/0.SetEnv.env
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/1.RawInstall.sh
 chmod 744 ?.*.sh
+...
 
 Make a directory to contain the build.  This does not need to be a mountpoint.  The build will be contained in a single directory for ease of transport.  A tar file is produced at the end of each phase of the build.
+...
 mkdir /media/sda2
+...
 
 Edit 0.SetEnv.env for any specific requirements.  Then run the build.
+...
 ./1.RawInstall.sh
+...
 
 Once the build is complete, you can scp the tar archive to a cloud server, extract and re-boot into the debian system.
+...
 scp /media/sda2/<BuildName>.tgz opc@YourServerIP:~/
+...
 
 Log in as root to the Oracle Cloud server (usually as opc then sudo).
+...
 sudo su -
 tar -zxf /home/opc/<BuildName>.tgz -C /boot
+...
 
 Switch out the defaut Oracle boot and replace with the Debian boot.
+...
 mv /boot/grub2/grub.cfg /boot/grub2/grub.cfg.std
 ln /boot/<BuildName>/boot/grub.cfg /boot/grub2/grub.cfg
+...
 
 copy ssh keys or chroot to this directory structure to enable some form of login.
+...
 cp -rp /home/opc/.ssh /boot/<BuildName>/home/opc/
 
 cp /etc/resolv.conf /boot/<BuildName>/etc/
 
 reboot
+...
 
 #######################################################
 
 Build Process.  Full install.
 Choose a suitable place for the build scripts.
+...
 mkdir EInstall
 cd EInstall
+...
 
 Get the environment file and initial build file.  You can, of course, use git to acquire all the files.
+...
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/0.SetEnv.env
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/1.RawInstall.sh
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/2.MakeXFS.sh
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/3.MakeOverlay.sh
 wget https://github.com/Chris-Scot/embarm/raw/refs/heads/main/4.MakeSquash.sh
 chmod 744 ?.*.sh
+...
 
 Make a directory to contain the build.  This does not need to be a mountpoint.  The build will be contained in a single directory for ease of transport.  A tar file is produced at the end of each phase of the build.
+...
 mkdir /media/sda2
+...
 
 Edit 0.SetEnv.env for any specific requirements.  Then run the build.
+...
 ./1.RawInstall.sh
 ./2.MakeXFS.sh
 ./3.MakeOverlay.sh
 ./4.MakeSquash.sh
+...
 
 Once the build is complete, you can scp the tar archive to a cloud server, extract and re-boot into the debian system.
+...
 scp /media/sda2/<BuildName>.tar opc@YourServerIP:~/
+...
 
 Log in as root to the Oracle Cloud server (usually as opc then sudo).
+...
 sudo su -
 tar -xf /home/opc/<BuildName>.tar -C /boot
+...
 
 Switch out the defaut Oracle boot and replace with the Debian boot.
+...
 mv /boot/grub2/grub.cfg /boot/grub2/grub.cfg.std
 ln /boot/<BuildName>/boot/grub.cfg /boot/grub2/grub.cfg
+...
 
 copy ssh keys or chroot to this directory structure to enable some form of login.
+...
 mount /boot/<BuildName>/Run.xfs /mnt
 cp -rp /home/opc/.ssh /mnt/home/opc/
 cp /etc/resolv.conf /mnt/etc/
 
 reboot
+...
 
 #######################################################
 
 One the system is running, you can delete the original OS installation and expand the boot filesystem.
 
 Finally, for some reason I thought I needed to install:
+...
 apt install ca-certificates
+...
