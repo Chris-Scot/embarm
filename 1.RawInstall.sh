@@ -121,7 +121,7 @@ cp $FromBase/Files/SnapAll.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/SnapExpire.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/lsoverlay $WorkDir/usr/local/sbin/
 cp $FromBase/Files/PathEnv.sh $WorkDir/etc/profile.d/
-chmod 755 $WorkDir/usr/local/sbin/*
+chmod 755 $WorkDir/usr/local/sbin/* $WorkDir/etc/rc.local
 
 rm $WorkDir/etc/resolv.conf
 ln -fs /etc/machine-id $WorkDir/var/lib/dbus/machine-id
