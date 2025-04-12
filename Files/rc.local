@@ -3,7 +3,7 @@ export HOME=/root
 export USER=root
 
 date
-ntpdate pool.ntp.org
+ntpdate pool.ntp.org > /var/log/ntpdate.log 2>&1
 crond
 
 StartVNC.sh
