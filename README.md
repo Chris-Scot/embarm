@@ -25,14 +25,11 @@ Concepts.
 The build process will move a repository cache from time to time.
 Moving the cache out, at the end of the build will reduce the build size.
 Moving the cache back into the build will expedite the build if it is re-run.
-________________________________________________________________________________
-
+---
 Build Process.  Raw install.
-Choose a suitable place for the build scripts.
-...
-mkdir EInstall
-cd EInstall
-...
+Choose a suitable place for the build scripts.  
+mkdir EInstall  
+cd EInstall  
 
 Get the environment file and initial build file.  You can, of course, use git to acquire all the files.
 ...
