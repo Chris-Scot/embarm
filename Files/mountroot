@@ -6,7 +6,7 @@ mountroot()
       ImageTag="*"
    fi
    mkdir -m0 /mnt
-   for Each in /dev/sd*2; do
+   for Each in $(blkid -o device); do
       mount $Each /mnt
       BootSystem=$(grep -l '^#	CloudDeb second init.$' /mnt/$ImageTag/boot/init | head)
       BootSystem=${BootSystem%/boot/init}
