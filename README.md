@@ -11,7 +11,7 @@ This procedure has been put together to get a debian installation onto Oracle's 
 Understandably, Oracle provide a limited amount of disk space with this offering.  The phases of this install will incrementally reduce the amount of storage used by the core OS.  Thusly, there will be more available for your data.
 If you can get one, the ARM servers have a very generous RAM & CPU allowance.
 
-The format of this installation was inspired by slax, written by Tomáš Matějíček.  Slax needs very little work to get it to go on Oracle Cloud.  If slax was available for ARM, that would be the way to go.
+The format of this installation was inspired by slax, created by Tomáš Matějíček.  Slax needs very little work to get it to go on Oracle Cloud.  If slax was available for ARM, that would be the way to go.
 
 Concepts.
 1.  Leave the uefi alone and add a new OS.
