@@ -27,7 +27,7 @@ Moving the cache out, at the end of the build will reduce the build size.
 Moving the cache back into the build will expedite the build if it is re-run.
 
 ---
-Build Process.  Raw install.
+Build Process.  Raw install (no squashfs).
 Choose a suitable place for the build scripts.  
 `mkdir EInstall`  
 `cd EInstall`
