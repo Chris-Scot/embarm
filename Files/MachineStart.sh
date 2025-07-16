@@ -10,7 +10,14 @@ else
    exit 1
 fi
 
-LowerDirs=":$MBase/.$CoreFile"
+if [ ! -d $Inception/.$CoreFile ]; then
+   mkdir -m0 $Inception/.$CoreFile
+fi
+if [ "$(stat -c %a "$Inception/.$CoreFile")" = "0" ]; then
+   mount -v $Inception/$CoreFile $Inception/.$CoreFile
+fi
+
+LowerDirs=":$Inception/.$CoreFile"
 
 export MachineName=$1
 export ServerName=${1,,}
@@ -42,13 +49,6 @@ if [ -d "$MBase/$MachineName" ]; then
 else
    echo "INFO:  Creating machine space '$MBase/$MachineName'."
    mkdir -m0 "$MBase/$MachineName"
-fi
-
-if [ ! -d $MBase/.$CoreFile ]; then
-   mkdir -m0 $MBase/.$CoreFile
-fi
-if [ "$(stat -c %a "$MBase/.$CoreFile")" = "0" ]; then
-   mount -v $Inception/$CoreFile $MBase/.$CoreFile
 fi
 
 if [ "$(stat -c %a "$MBase/$MachineName")" = "0" ]; then
@@ -106,42 +106,6 @@ else
    echo "INFO: Filesystem already mounted."
 fi
 
-HLoopIP=$(awk -F '.' '/\t'$ServerName'\t/||/\t'$ServerName'$/{print $2}' /etc/hosts)
-if [ "$HLoopIP" = "" ]; then
-   GLoopIP=$(awk -F '.' '/\t'$ServerName'\t/||/\t'$ServerName'$/{print $2}' $MBase/$MachineName/etc/hosts)
-   if [ "$GLoopIP" = "" ]; then
-      echo "INFO:  Creating new loopback IP for Guest & Host."
-      HLoopIP=$(awk -F '.' '/^127\./{print $2 +1}' /etc/hosts | sort | tail -1)
-      echo -e "127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" >> /etc/hosts
-      echo -e "127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" >> $MBase/$MachineName/etc/hosts
-   else
-      if grep "^127.$GLoopIP.0.1\t" /etc/hosts; then
-         echo "WARNING:  Guest loopback IP exists for another guest."
-         echo "INFO:  Creating new loopback IP for Guest & Host."
-         HLoopIP=$(awk -F '.' '/^127\./{print $2 +1}' /etc/hosts | sort | tail -1)
-         echo -e "127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" >> /etc/hosts
-         sed -i "/127.$GLoopIP.0.1\t/c\127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" $MBase/$MachineName/etc/hosts
-      else
-         echo "INFO:  Updating Host loopback IP from Guest."
-         HLoopIP=$GLoopIP
-         echo -e "127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" >> /etc/hosts
-      fi
-   fi
-else
-   GLoopIP=$(awk -F '.' '/\t'$ServerName'$/{print $2}' $MBase/$MachineName/etc/hosts)
-   if [ "$GLoopIP" = "" ]; then
-      echo "INFO:  Creating new loopback IP for Guest from Host."
-      echo -e "127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" >> $MBase/$MachineName/etc/hosts
-   else
-      if [ "$HLoopIP" = "$GLoopIP" ]; then
-         echo "INFO:  Guest & Host loopback IP match."
-      else
-         echo "WARNING:  Updating Guest loopback IP from Host."
-         sed -i "/127.$GLoopIP.0.1\t/c\127.$HLoopIP.0.1\t${ServerName}.localdomain\t${ServerName}" $MBase/$MachineName/etc/hosts
-      fi
-   fi
-fi
-
 echo "INFO:  Starting '$MachineName'."
 Running="No"
 machinectl start $MachineName
@@ -155,6 +119,14 @@ for Each in {1..10}; do
 done
 
 if [ "$Running" = "Yes" ]; then
+   if [ -f $MBase/$MachineName/root/.xpra/passwd ]; then
+      UserLine="$MachineName|$(head -1 $MBase/$MachineName/root/.xpra/passwd)|$(stat -c '%u|%g' $MBase/$MachineName/root/.xpra/xpra-0)|$MBase/$MachineName/root/.xpra/xpra-0"
+      if ! grep -q "^$UserLine$" /usr/share/xpra/UserList; then
+         Result="$(grep -v "^$MachineName|" /usr/share/xpra/UserList; echo "$UserLine")"
+         echo "$Result" | sort > /usr/share/xpra/UserList
+      fi
+   fi
+
    if [ -x $Inception/$MachineName.sh ]; then
       $Inception/$MachineName.sh start
    fi

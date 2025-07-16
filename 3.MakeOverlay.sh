@@ -22,7 +22,7 @@ echo -e "______  $LINENO  ____  Reconfigure as an overlay /  squashfs system.  _
 ################################################################################
 LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
 
-apt -y install bindfs cloud-init firewalld fluxbox novnc oathtool qrencode squashfs-tools systemd-container tightvncserver xfonts-base xorg
+apt -y install $MoreInstall
 
 PATH=/usr/local/sbin:/usr/sbin:/usr/bin
 cd /usr/local/bin
@@ -48,9 +48,11 @@ cp $FromBase/Files/MachineDelete.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/MachineStart.sh $WorkDir/usr/local/sbin/
 cp $FromBase/Files/MachineStop.sh $WorkDir/usr/local/sbin/
 
-echo -e "______  $LINENO  ____  Build filesystem for 02-Cloud-init.  _____________________________________\n"
+if [ -d $WorkDir/etc/cloud ]; then
+   echo -e "______  $LINENO  ____  Build filesystem for 02-Cloud-init.  _____________________________________\n"
 
-cp $FromBase/Files/cloud.cfg $WorkDir/etc/cloud/cloud.cfg
+   cp $FromBase/Files/cloud.cfg $WorkDir/etc/cloud/cloud.cfg
+fi
 
 echo -e "______  $LINENO  ____  Build filesystem for 03-Container.  ______________________________________\n"
 
@@ -63,17 +65,10 @@ echo "session.screen0.workspaces: 1" >> $WorkDir/etc/X11/fluxbox/init
 echo "session.screen0.toolbar.height: 32" >> $WorkDir/etc/X11/fluxbox/init
 sed -i '/^background.pixmap: /c\background.pixmap:\t/usr/share/images/fluxbox/KyaeolOS.jpg' $WorkDir/usr/share/fluxbox/styles/Squared_for_Debian/theme.cfg
 
-echo -e "______  $LINENO  ____  Build filesystem for 10-NoVNC.  __________________________________________\n"
+echo -e "______  $LINENO  ____  Build filesystem for 10-XPRA.  ___________________________________________\n"
 
-find $WorkDir/usr/share/novnc -type d -exec touch {}/index.htm \;
-
-mkdir $WorkDir/root/.vnc
-echo "startfluxbox" > $WorkDir/root/.vnc/xstartup
-chmod 755 $WorkDir/root/.vnc/xstartup
-
-cp $FromBase/Files/novnc_authenticator $WorkDir/usr/local/sbin/
-cp $FromBase/Files/ConnectVNC.sh $WorkDir/usr/local/sbin/
-cp $FromBase/Files/StartVNC.sh $WorkDir/usr/local/sbin/
+cp $FromBase/Files/stunnel.conf $WorkDir/etc/stunnel/
+cp $FromBase/Files/StartXPRA.sh $WorkDir/usr/local/sbin/
 chmod 755 $WorkDir/usr/local/sbin/*
 
 echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag.  _______________________\n"
@@ -88,7 +83,7 @@ truncate $WorkDir.Run.xfs -s 10G
 mkfs.xfs -L Run $WorkDir.Run.xfs
 sync
 mount -v $WorkDir.Run.xfs /mnt
-mkdir -p /mnt/root/.vnc /mnt/home/opc /mnt/etc/default /mnt/usr/local
+mkdir -p /mnt/root /mnt/home/opc /mnt/etc/default /mnt/usr/local
 chmod 700 /mnt/root /mnt/home/opc
 chown 1000:1000 /mnt/home/opc
 echo "$ImageTag" > /mnt/etc/hostname

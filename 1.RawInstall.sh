@@ -18,8 +18,9 @@ echo -e "______  $LINENO  ____  Get additional files required for install.  ____
 (  [ -d $FromBase/Files ] || mkdir $FromBase/Files
    cd $FromBase/Files
    for Each in $(awk '/^cp \$FromBase\/Files\//{print $2}' $FromBase/[0-9].*.sh); do
-      rm -f ${Each##*/}
-      wget -nv https://github.com/Chris-Scot/embarm/raw/refs/heads/main/${Each#*/}
+      if [ ! -f "${Each##*/}" ]; then
+         wget -nv https://github.com/Chris-Scot/embarm/raw/refs/heads/main/${Each#*/}
+      fi
    done )
 
 echo -e "______  $LINENO  ____  Copy repository cache for quicker building.  _____________________________\n"
@@ -31,7 +32,7 @@ echo -e "______  $LINENO  ____  Download and prepare debian install.  __________
 mkdir -p $WorkDir/var/cache
 echo "Cache $(find $FromBase/Cache.${ProcArch}/apt | wc -l) -> $(find $WorkDir/var/cache/apt | wc -l)"; cp -rn $FromBase/Cache.${ProcArch}/apt $WorkDir/var/cache/
 #	The --excluded stuff is included in busybox.
-debootstrap --foreign --arch $RepoArch --variant=minbase --include=busybox-static,dbus,dropbear,ntpdate,openssh-client,openssh-sftp-server,sudo,systemd,rsync,tmux,xfsprogs --exclude=cpio,fdisk,gzip,hostname,ifupdown,iputils-ping,less,libfdisk1,procps,vim-common,vim-tiny,whiptail,zlib1g bookworm $WorkDir http://ftp.uk.debian.org/debian
+debootstrap --foreign --arch $RepoArch --variant=minbase --include=$CoreInclude --exclude=$CoreExclude $CoreVersion $WorkDir http://ftp.uk.debian.org/debian
 
 cp /usr/bin/qemu-${ProcArch}-static $WorkDir/
 mkdir -p $WorkDir/etc/apt/apt.conf.d/
@@ -48,8 +49,8 @@ echo -e "______  $LINENO  ____  Install a kernel into the target filesystem.  __
 ################################################################################
 LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << EOInstall
 
-if [ "$KernelVersion" = "" ]; then
-   KernelVersion=\$(apt list | grep "linux-image-6.*-cloud-$RepoArch/"|sort|tail -1)
+if [ "${KernelVersion:0:11}" != "linux-image"  ]; then
+   KernelVersion=\$(apt list | grep "linux-image-6.*[0-9]$KernelVersion-$RepoArch/"|sort|tail -1)
    KernelVersion=\${KernelVersion%%/*}
 fi
 apt -y install \$KernelVersion

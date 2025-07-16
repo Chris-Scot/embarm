@@ -1,5 +1,6 @@
 #	CloudDeb second init.
 chmod 0 $rootmnt
+Inception=/Inception
 
 if [ "$RootRW" != "${RootRW/\/}" ]; then
    echo "ERROR:  Root filesystem '$RootRW' should not contain a path."
@@ -46,7 +47,7 @@ else
    if [ -f "$BootSystem/$RootRW.xfs" ]; then
       mkdir -m0 /$RootRW.xfs
       mount -v $BootSystem/$RootRW.xfs /$RootRW.xfs
-      if [ -d /$RootRW.xfs/etc -a -d /$RootRW.xfs/media -a -d /$RootRW.xfs/usr ]; then
+      if [ -d /$RootRW.xfs/etc -a -d /$RootRW.xfs/media -a -d /$RootRW.xfs/usr -a -d /$RootRW.xfs/boot ]; then
          mount -v --move /$RootRW.xfs $rootmnt
          mount -v $BootSystem/boot $rootmnt/boot
          rmdir $rootmnt/media/*
@@ -107,7 +108,7 @@ if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
       mount -v $BootSystem/Core.sq /Core.sq
       LowerDir="/Core.sq"
    elif [ -f "$BootSystem/$RootRO.xfs" ]; then
-      LowerDir="/$RootRO.xfs"
+      LowerDir="${MidDir:0:-1}"
       MidDir=""
    else
       echo "ERROR:  Can't find Core filesystem to back overlay."
@@ -122,10 +123,14 @@ if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
    Result=$(awk '/ \/mnt xfs /{print $1}' /proc/mounts)
    mkdir -m0 $rootmnt/media/${Result##*/}
    mount -v --move /mnt $rootmnt/media/${Result##*/}
-   [ -d $rootmnt/Inception ] || mkdir -m0 $rootmnt/Inception
-   mount -v $rootmnt/media/${Result##*/}/$ImageTag $rootmnt/Inception
-   [ -d $rootmnt/var/lib/machines/.${LowerDir:1} ] || mkdir -pm0 $rootmnt/var/lib/machines/.${LowerDir:1}
-   mount -v --move $LowerDir $rootmnt/var/lib/machines/.${LowerDir:1}
+   [ -d $rootmnt/$Inception ] || mkdir -m0 $rootmnt/$Inception
+   mount -v $rootmnt/media/${Result##*/}/$ImageTag $rootmnt/$Inception
+   [ -d $rootmnt/$Inception/.${LowerDir:1} ] || mkdir -pm0 $rootmnt/$Inception/.${LowerDir:1}
+   mount -v --move $LowerDir $rootmnt/$Inception/.${LowerDir:1}
+   if [ "$MidDir" != "" ]; then
+      [ -d $rootmnt/$Inception/.${MidDir:1:-1} ] || mkdir -pm0 $rootmnt/$Inception/.${MidDir:1:-1}
+      mount -v --move $MidDir $rootmnt/$Inception/.${MidDir:1:-1}
+   fi
    echo "Host filesystem ($LowerDir $RootRO $UpperDir) built OK."
 else
    echo "ERROR:  There should have been a filesystem here."
