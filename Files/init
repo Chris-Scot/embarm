@@ -129,7 +129,7 @@ if [ "$(stat -c %a "$rootmnt")" = "0" ]; then
    mount -v --move $LowerDir $rootmnt/$Inception/.${LowerDir:1}
    if [ "$MidDir" != "" ]; then
       [ -d $rootmnt/$Inception/.${MidDir:1:-1} ] || mkdir -pm0 $rootmnt/$Inception/.${MidDir:1:-1}
-      mount -v --move $MidDir $rootmnt/$Inception/.${MidDir:1:-1}
+      mount -v --move ${MidDir:0:-1} $rootmnt/$Inception/.${MidDir:1:-1}
    fi
    echo "Host filesystem ($LowerDir $RootRO $UpperDir) built OK."
 else

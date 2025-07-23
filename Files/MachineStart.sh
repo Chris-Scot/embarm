@@ -51,6 +51,13 @@ else
    mkdir -m0 "$MBase/$MachineName"
 fi
 
+if [ "$(stat -c %a "$MBase")" != "750" ]; then
+   chmod 750 "$MBase"
+fi
+if [ "$(stat -c %G "$MBase")" != "xpra" ]; then
+   chgrp xpra "$MBase"
+fi
+
 if [ "$(stat -c %a "$MBase/$MachineName")" = "0" ]; then
    echo "INFO:  Mount filesystem."
    if [  -e "$Inception/$MachineName.xfs" ]; then
@@ -107,6 +114,7 @@ else
 fi
 
 echo "INFO:  Starting '$MachineName'."
+StartProxy.sh reload
 Running="No"
 machinectl start $MachineName
 for Each in {1..10}; do
@@ -120,10 +128,8 @@ done
 
 if [ "$Running" = "Yes" ]; then
    if [ -f $MBase/$MachineName/root/.xpra/passwd ]; then
-      UserLine="$MachineName|$(head -1 $MBase/$MachineName/root/.xpra/passwd)|$(stat -c '%u|%g' $MBase/$MachineName/root/.xpra/xpra-0)|$MBase/$MachineName/root/.xpra/xpra-0"
-      if ! grep -q "^$UserLine$" /usr/share/xpra/UserList; then
-         Result="$(grep -v "^$MachineName|" /usr/share/xpra/UserList; echo "$UserLine")"
-         echo "$Result" | sort > /usr/share/xpra/UserList
+      if ! grep -q "^$MachineName|$(head -1 $MBase/$MachineName/root/.xpra/passwd)|" /usr/share/xpra/UserList; then
+         touch $MBase/$MachineName/root/.xpra/passwd
       fi
    fi
 

@@ -98,6 +98,8 @@ cp $WorkDir/lib/modules/*/kernel/fs/overlayfs/overlay.ko $WorkDir/boot/lib/
 echo -e "______  $LINENO  ____  Make the network run nicely.  ___________________________________________\n"
 
 cp $FromBase/Files/20-wired.network $WorkDir/etc/systemd/network/
+cp $FromBase/Files/20-ipvlan.network $WorkDir/etc/systemd/network/
+cp $FromBase/Files/20-macvlan.network $WorkDir/etc/systemd/network/
 
 ################################################################################
 LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'

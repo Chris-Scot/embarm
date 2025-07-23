@@ -24,6 +24,8 @@ LANG=C.UTF-8 chroot $WorkDir /qemu-${ProcArch}-static /bin/sh << 'EOInstall'
 
 apt -y install $MoreInstall
 
+setcap 'cap_net_bind_service=+ep' /usr/bin/stunnel4
+
 PATH=/usr/local/sbin:/usr/sbin:/usr/bin
 cd /usr/local/bin
 for Each in $(ls -1); do
@@ -55,21 +57,28 @@ if [ -d $WorkDir/etc/cloud ]; then
 fi
 
 echo -e "______  $LINENO  ____  Build filesystem for 03-Container.  ______________________________________\n"
-
-sed -i 's/--network-veth //' $WorkDir/usr/lib/systemd/system/systemd-nspawn\@.service
+  
+if [ -d $WorkDir/etc/cloud ]; then
+   sed -i 's/--network-veth /--network-macvlan=enp0s6 /' $WorkDir/usr/lib/systemd/system/systemd-nspawn\@.service
+else
+   sed -i 's/--network-veth /--network-macvlan=ens3 /' $WorkDir/usr/lib/systemd/system/systemd-nspawn\@.service
+fi
 
 echo -e "______  $LINENO  ____  Build filesystem for 05-Desktop.  ________________________________________\n"
 
-cp $FromBase/Files/KyaeolOS.jpg $WorkDir/usr/share/images/fluxbox/KyaeolOS.jpg
+cp $FromBase/Files/KyaeolOS.jpg $WorkDir/usr/share/images/fluxbox/
 echo "session.screen0.workspaces: 1" >> $WorkDir/etc/X11/fluxbox/init
 echo "session.screen0.toolbar.height: 32" >> $WorkDir/etc/X11/fluxbox/init
 sed -i '/^background.pixmap: /c\background.pixmap:\t/usr/share/images/fluxbox/KyaeolOS.jpg' $WorkDir/usr/share/fluxbox/styles/Squared_for_Debian/theme.cfg
 
 echo -e "______  $LINENO  ____  Build filesystem for 10-XPRA.  ___________________________________________\n"
 
+rm $WorkDir/etc/xpra/*.pem
 cp $FromBase/Files/stunnel.conf $WorkDir/etc/stunnel/
-cp $FromBase/Files/StartXPRA.sh $WorkDir/usr/local/sbin/
+cp $FromBase/Files/StartProxy.sh $WorkDir/usr/local/sbin/
+cp $FromBase/Files/StartXPRA.sh $WorkDir/usr/local/bin/
 chmod 755 $WorkDir/usr/local/sbin/*
+chmod 755 $WorkDir/usr/local/bin/*
 
 echo -e "______  $LINENO  ____  Clean up random files after installing $ImageTag.  _______________________\n"
 
