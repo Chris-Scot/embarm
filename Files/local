@@ -8,7 +8,7 @@ mountroot()
    mkdir -m0 /mnt
    for Each in $(blkid -o device); do
       mount $Each /mnt
-      BootSystem=$(grep -l '^#	CloudDeb second init.$' /mnt/$ImageTag/boot/init | head)
+      BootSystem=$(grep -l '^#	CloudDeb second init.$' /mnt/$ImageTag/boot/init | head -1)
       BootSystem=${BootSystem%/boot/init}
       if [ "$BootSystem" != "" ]; then
          . $BootSystem/boot/init

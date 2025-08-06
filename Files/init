@@ -18,7 +18,15 @@ if [ "$RootRO" = "" -a "$RootRW" = "" ]; then
       mount -v --move /mnt $rootmnt/media/${Result##*/}
       echo "Host filesystem ($BootSystem) mounted OK."
       return
-   elif [ ! -f $BootSystem/Core.sq ]; then
+   elif [ -f $BootSystem/Core.sq ]; then
+      if [ -f $BootSystem/Firm.sq -o $BootSystem/Firm.xfs ]; then
+otSystem/Firm.sq
+         RootRO="Firm"
+      fi
+      if [ -f $BootSystem/Resume.xfs ]; then
+         RootRW="Resume"
+      fi
+   else
       echo "ERROR:  Can't find Core filesystem to back overlay."
 /bin/sh
       exit 1

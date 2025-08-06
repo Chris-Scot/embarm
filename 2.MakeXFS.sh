@@ -4,7 +4,7 @@ echo -e "______  $LINENO  ____  Set default build variables.  __________________
 
 . $(dirname $(readlink -f $0))/?.*.env
 
-echo -e "______  $LINENO  ____  Create Run xfs filesystem for $ImageTag.  _______________________________\n"
+echo -e "______  $LINENO  ____  Create Run xfs filesystem for $ImageTag.  ________________________________\n"
 
 mv $WorkDir $WorkDir.tmp
 mkdir $WorkDir

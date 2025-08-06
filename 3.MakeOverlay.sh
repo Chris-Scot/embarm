@@ -88,13 +88,17 @@ rm -rf $WorkDir/var/cache/apt
 
 echo -e "______  $LINENO  ____  Create filesystem for HostFirm.  _________________________________________\n"
 
-truncate $WorkDir.Run.xfs -s 10G
-mkfs.xfs -L Run $WorkDir.Run.xfs
+truncate $WorkDir.Firm.xfs -s 10G
+mkfs.xfs -L Firm $WorkDir.Firm.xfs
 sync
-mount -v $WorkDir.Run.xfs /mnt
-mkdir -p /mnt/root /mnt/home/opc /mnt/etc/default /mnt/usr/local
-chmod 700 /mnt/root /mnt/home/opc
-chown 1000:1000 /mnt/home/opc
+mount -v $WorkDir.Firm.xfs /mnt
+mkdir -p /mnt/root /mnt/home/opc/.ssh /mnt/etc/default /mnt/usr/local
+chmod -R 700 /mnt/root /mnt/home/opc
+if [ -f $FromBase/Files/authorized_keys ]; then
+   cp $FromBase/Files/authorized_keys /mnt/home/opc/.ssh/
+   chmod 600 /mnt/home/opc/.ssh/authorized_keys
+fi
+chown -R 1000:1000 /mnt/home/opc
 echo "$ImageTag" > /mnt/etc/hostname
 mv $WorkDir/etc/resolv.conf /mnt/etc/
 mv $WorkDir/usr/local/sbin /mnt/usr/local/sbin/
@@ -115,8 +119,9 @@ mount -v $WorkDir.Core.xfs /mnt
 mv $WorkDir/* /mnt/
 umount -v /mnt
 umount -v $WorkDir
+rm $WorkDir/Run.xfs 
 mv $WorkDir.Core.xfs $WorkDir/Core.xfs
-mv $WorkDir.Run.xfs $WorkDir/Run.xfs
+mv $WorkDir.Firm.xfs $WorkDir/Firm.xfs
 
 truncate $WorkDir/Resume.xfs -s 10G
 mkfs.xfs -L Resume $WorkDir/Resume.xfs
@@ -130,12 +135,12 @@ set timeout=4
 set default=Run
 
 menuentry 'Run' --id 'Run' {
-  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Run boot=mountroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Firm boot=mountroot
   initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
 menuentry 'Resume' --id 'Resume' {
-  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Run RootRW=Resume boot=mountroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag RootRO=Firm RootRW=Resume boot=mountroot
   initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 

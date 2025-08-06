@@ -73,7 +73,7 @@ set timeout=4
 set default=Raw
 
 menuentry 'Raw' --id 'Raw' {
-  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag boot=mountroot
+  linux (\$dev)/$ImageTag/boot/vmlinuz ImageTag=$ImageTag
   initrd (\$dev)/$ImageTag/boot/initrd (\$dev)/$ImageTag/boot/initroot
 }
 
@@ -83,9 +83,9 @@ menuentry 'OracleCloud' --id 'OracleCloud' {
 EOInstall
 
 [ -d $WorkDir/boot/scripts ] || mkdir $WorkDir/boot/scripts
-cp $FromBase/Files/mountroot $WorkDir/boot/scripts/
+cp $FromBase/Files/local $WorkDir/boot/scripts/
 (  cd $WorkDir/boot
-   echo scripts/mountroot | cpio -oH newc | gzip > initroot
+   echo scripts/local | cpio -oH newc | zstd > initroot
    rm -rf scripts  
 )
 
