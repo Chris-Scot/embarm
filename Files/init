@@ -19,12 +19,11 @@ if [ "$RootRO" = "" -a "$RootRW" = "" ]; then
       echo "Host filesystem ($BootSystem) mounted OK."
       return
    elif [ -f $BootSystem/Core.sq ]; then
-      if [ -f $BootSystem/Firm.sq -o $BootSystem/Firm.xfs ]; then
-otSystem/Firm.sq
-         RootRO="Firm"
+      if [ -f $BootSystem/RootRO.sq -o $BootSystem/RootRO.xfs ]; then
+         RootRO="RootRO"
       fi
-      if [ -f $BootSystem/Resume.xfs ]; then
-         RootRW="Resume"
+      if [ -f $BootSystem/RootRW.xfs ]; then
+         RootRW="RootRW"
       fi
    else
       echo "ERROR:  Can't find Core filesystem to back overlay."
